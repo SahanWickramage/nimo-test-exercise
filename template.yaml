@@ -3,39 +3,38 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   nimo-test-exercise
 
-  Sample SAM Template for nimo-test-exercise
+  Nimo Test Exercise contains two serverless microservices to query cryptocurrency prices and query search history!
   
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 3
 
 Resources:
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+  CryptocurrencyPriceFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      CodeUri: hello-world/
+      CodeUri: cryptocurrency-price-service/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
       Architectures:
         - x86_64
       Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        CryptocurrencyPriceEvent:
+          Type: Api
           Properties:
-            Path: /hello
+            Path: /prices
             Method: get
+          Environment:
+            Variables:
+              API_ENV: dev
 
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+  CryptocurrencyPriceApi:
+    Description: "API Gateway endpoint URL for dev cryptocurrency price function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/dev/prices/"
+  CryptocurrencyPriceFunction:
+    Description: "Cryptocurrency price function ARN"
+    Value: !GetAtt CryptocurrencyPriceFunction.Arn
+  CryptocurrencyPriceFunctionIamRole:
+    Description: "Implicit IAM Role created for cryptocurrency price function"
+    Value: !GetAtt CryptocurrencyPriceFunctionRole.Arn
