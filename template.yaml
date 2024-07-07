@@ -10,6 +10,10 @@ Globals:
     Timeout: 3
 
 Resources:
+  CommonApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
   CryptocurrencyPriceFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -19,19 +23,17 @@ Resources:
       Architectures:
         - x86_64
       Events:
-        CryptocurrencyPriceEvent:
+        CryptocurrencyPriceFunctionEvent:
           Type: Api
           Properties:
             Path: /prices
             Method: get
-          Environment:
-            Variables:
-              API_ENV: dev
+            RestApiId: !Ref CommonApiGateway
 
 Outputs:
-  CryptocurrencyPriceApi:
-    Description: "API Gateway endpoint URL for dev cryptocurrency price function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/dev/prices/"
+  CommonApiGateway:
+    Description: "Common API Gateway for both lambda functions for dev stage"
+    Value: !Sub "https://${CommonApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev/**"
   CryptocurrencyPriceFunction:
     Description: "Cryptocurrency price function ARN"
     Value: !GetAtt CryptocurrencyPriceFunction.Arn
