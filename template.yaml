@@ -51,11 +51,10 @@ Resources:
       AllowedOAuthFlows:
         - client_credentials
       GenerateSecret: true
-      SupportedIdentityProviders:
-        - COGNITO
-      # AllowedOAuthScopes:
-      #   - !Ref CryptocurrencyPriceResourceServer.Scopes.prices:read
-      #   - !Ref SearchHistoryResourceServer.Scopes.history:read
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes:
+        - 'prices/read'
+        - 'history/read'
 
   CryptocurrencyPriceResourceServer:
     Type: AWS::Cognito::UserPoolResourceServer
@@ -64,7 +63,7 @@ Resources:
       Name: cryptocurrency-price-resource-server
       UserPoolId: !Ref CognitoUserPool
       Scopes:
-        - ScopeName: prices:read
+        - ScopeName: 'read'
           ScopeDescription: for cryptocurrency price GET endpoint
 
   SearchHistoryResourceServer:
@@ -74,7 +73,7 @@ Resources:
       Name: search-history-resource-server
       UserPoolId: !Ref CognitoUserPool
       Scopes:
-        - ScopeName: history:read 
+        - ScopeName: 'read' 
           ScopeDescription: for search history GET endpoint
 
   CommonApiGateway:
@@ -103,10 +102,10 @@ Resources:
             Path: /prices
             Method: get
             RestApiId: !Ref CommonApiGateway
-            # Auth:
-            #   Authorizer: MyCognitoAuthorizer
-            #   AuthorizationScopes:
-            #     - prices:read
+            Auth:
+              Authorizer: MyCognitoAuthorizer
+              AuthorizationScopes:
+                - 'prices/read'
 
   SearchHistoryFunction:
     Type: AWS::Serverless::Function
@@ -124,10 +123,10 @@ Resources:
             Path: /history
             Method: get
             RestApiId: !Ref CommonApiGateway
-            # Auth:
-            #   Authorizer: MyCognitoAuthorizer
-            #   AuthorizationScopes:
-            #     - prices:read
+            Auth:
+              Authorizer: MyCognitoAuthorizer
+              AuthorizationScopes:
+                - 'history/read'
 
   SearchHistoryRole:
     Type: AWS::IAM::Role
