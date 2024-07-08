@@ -20,11 +20,14 @@ Create two serverless microservices:
 - Cognito user pool - To provide authentication
 - Coingecko API - To fetch cryptocurrency prices
 
+Notes - For this solution AWS free tier and Coingecko demo API was used! 
+
 ## API Documentation
 
-Get cryptocurrency current price
+1. Get cryptocurrency current price
+2. Get search history
 
-Get search history
+available coin name and id table
 
 ## Improvements
 
@@ -32,6 +35,7 @@ Following improvements are planned.
 
 1. Put Lambdas in a private subnet and open to internet via NAT gateway
 2. Promote more minimum priviledge in IAM Roles
-3. Refactor SAM templates and source code (structure, variable names, readability, etc)
+3. Refactor SAM templates and source code (structure, variable names, readability, add more logs, etc)
 4. Add missing outputs to SAM template
 5. Add unit tests and automated tests
+6. Improve source code (introduce pagination, improve request response, etc)
