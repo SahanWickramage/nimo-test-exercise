@@ -45,14 +45,48 @@ Resources:
     Properties:
       ClientName: nimo-test-exercise-app-client
       UserPoolId: !Ref CognitoUserPool
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
       AllowedOAuthFlows:
         - client_credentials
       GenerateSecret: true
+      SupportedIdentityProviders:
+        - COGNITO
+      # AllowedOAuthScopes:
+      #   - !Ref CryptocurrencyPriceResourceServer.Scopes.prices:read
+      #   - !Ref SearchHistoryResourceServer.Scopes.history:read
+
+  CryptocurrencyPriceResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties:
+      Identifier: prices
+      Name: cryptocurrency-price-resource-server
+      UserPoolId: !Ref CognitoUserPool
+      Scopes:
+        - ScopeName: prices:read
+          ScopeDescription: for cryptocurrency price GET endpoint
+
+  SearchHistoryResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties:
+      Identifier: history
+      Name: search-history-resource-server
+      UserPoolId: !Ref CognitoUserPool
+      Scopes:
+        - ScopeName: history:read 
+          ScopeDescription: for search history GET endpoint
 
   CommonApiGateway:
     Type: AWS::Serverless::Api
     Properties:
       StageName: dev
+      Auth:
+        Authorizers:
+          MyCognitoAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
+            IdentitySource: method.request.header.Authorization
+  
   CryptocurrencyPriceFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -61,6 +95,7 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - x86_64
+      Role: !GetAtt CryptocurrencyPriceRole.Arn
       Events:
         CryptocurrencyPriceFunctionEvent:
           Type: Api
@@ -68,6 +103,39 @@ Resources:
             Path: /prices
             Method: get
             RestApiId: !Ref CommonApiGateway
+            # Auth:
+            #   Authorizer: MyCognitoAuthorizer
+            #   AuthorizationScopes:
+            #     - prices:read
+
+  CryptocurrencyPriceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaDynamoDBExecutionRole
+
+  CryptocurrencyPriceTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: nimo-exercise-cryptocurrency-prices
 
 Outputs:
   CommonApiGateway:
@@ -76,6 +144,6 @@ Outputs:
   CryptocurrencyPriceFunction:
     Description: "Cryptocurrency price function ARN"
     Value: !GetAtt CryptocurrencyPriceFunction.Arn
-  CryptocurrencyPriceFunctionIamRole:
-    Description: "Implicit IAM Role created for cryptocurrency price function"
-    Value: !GetAtt CryptocurrencyPriceFunctionRole.Arn
+  # CryptocurrencyPriceFunctionIamRole:
+  #   Description: "Implicit IAM Role created for cryptocurrency price function"
+  #   Value: !GetAtt CryptocurrencyPriceFunctionRole.Arn
