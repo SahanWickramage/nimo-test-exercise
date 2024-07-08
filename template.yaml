@@ -108,6 +108,50 @@ Resources:
             #   AuthorizationScopes:
             #     - prices:read
 
+  SearchHistoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: search-history-service/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Role: !GetAtt SearchHistoryRole.Arn
+      Events:
+        SearchHistoryFunctionEvent:
+          Type: Api
+          Properties:
+            Path: /history
+            Method: get
+            RestApiId: !Ref CommonApiGateway
+            # Auth:
+            #   Authorizer: MyCognitoAuthorizer
+            #   AuthorizationScopes:
+            #     - prices:read
+
+  SearchHistoryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: LambdaInvocationPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt CryptocurrencyPriceFunction.Arn
+
   CryptocurrencyPriceRole:
     Type: AWS::IAM::Role
     Properties:
