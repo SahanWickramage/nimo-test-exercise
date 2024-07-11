@@ -1,11 +1,8 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { SESClient } from "@aws-sdk/client-ses";
-import { GetEmailIdentityCommand } from "@aws-sdk/client-ses/commands";
 
 const ddbClient = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(ddbClient);
-const client = new SESClient();
 
 const baseUrl = process.env.COINGECKO_URL;
 const apiKey = process.env.COINGECKO_API_KEY;
@@ -102,11 +99,10 @@ export const lambdaHandler = async (event, context) => {
         const dynamodbResponse = await ddbClient.send(command);
         console.log("Item added successfully:", dynamodbResponse);
 
-        // check email identity is verified or not
-        const emailIdentityCommand = new GetEmailIdentityCommand({ EmailAddress: email });
-        const emailIdentityResponse = await client.send(emailIdentityCommand);
-        console.log('Email identity response:', emailIdentityResponse);
-
+        return {
+          statusCode: 200,
+          body: JSON.stringify({"dynamodbResponse": dynamodbResponse})
+        };
       }
       }
 
