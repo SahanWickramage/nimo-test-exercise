@@ -27,15 +27,15 @@ Notes - For this solution AWS free tier and Coingecko demo API was used!
 1. Get cryptocurrency current price
 2. Get search history
 
-available coin name and id table
-
 ## Improvements
 
 Following improvements are planned.
 
-1. Put Lambdas in a private subnet and open to internet via NAT gateway
-2. Promote more minimum priviledge in IAM Roles
-3. Refactor SAM templates and source code (structure, variable names, readability, add more logs, etc)
-4. Add missing outputs to SAM template
-5. Add unit tests and automated tests
-6. Improve source code (introduce pagination, improve request response, etc)
+1. Put Lambdas to a VPC from default VPC
+2. Implement CICD
+3. Put Lambdas in a private subnet and open to internet via NAT gateway
+4. Promote more minimum priviledge in IAM Roles
+5. Refactor SAM templates and source code (structure, variable names, readability, add more logs, etc)
+6. Add missing outputs to SAM template
+7. Add unit tests and automated tests
+8. Improve source code (introduce pagination, improve request response, etc)
