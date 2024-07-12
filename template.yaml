@@ -112,6 +112,7 @@ Resources:
               Authorizer: MyCognitoAuthorizer
               AuthorizationScopes:
                 - 'prices/read'
+            Stage: dev
 
   SearchHistoryFunction:
     Type: AWS::Serverless::Function
@@ -136,6 +137,7 @@ Resources:
               Authorizer: MyCognitoAuthorizer
               AuthorizationScopes:
                 - 'history/read'
+            Stage: dev
 
   SearchHistoryRole:
     Type: AWS::IAM::Role
@@ -182,8 +184,19 @@ Resources:
               - Effect: Allow
                 Action:
                   - dynamodb:Scan
+                  - "dynamodb:PutItem"
                 Resource:
                   - !GetAtt CryptocurrencyPriceTable.Arn
+        - PolicyName: SESEmailPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ses:SendEmail"
+                  - "ses:SendRawEmail"
+                Resource: 
+                  - "arn:aws:ses:ap-southeast-2:211125780252:identity/*"
 
   CryptocurrencyPriceTable:
     Type: AWS::DynamoDB::Table
