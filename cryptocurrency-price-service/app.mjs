@@ -1,13 +1,15 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { CoingeckoService } from './services/coingecko-service.mjs'
+import EmailService from "./services/email-service.mjs";
 
 const ddbClient = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(ddbClient);
 const sesClient = new SESClient();
+const coingeckoService = new CoingeckoService();
+const emailService = new EmailService();
 
-const baseUrl = process.env.COINGECKO_URL;
-const apiKey = process.env.COINGECKO_API_KEY;
 const dynamodbTableName = process.env.DYNAMODB_TABLE;
 const sourceEmail = process.env.SOURCE_EMAIL;
 
@@ -64,31 +66,7 @@ export const lambdaHandler = async (event, context) => {
         const coinId = event.queryStringParameters.coinId;
         console.log('coinId:', coinId);
 
-        const headers = {
-          'accept': 'application/json',
-          'x-cg-pro-api-key': 'CG-Puzd4QbkcqBh2aZkmSEoZe7J'
-        };
-        console.log(`x-cg-pro-api-key: ${apiKey}`);
-      
-        const requestOptions = {
-          method: 'GET',
-          headers: headers
-        };
-
-        const url = `${baseUrl}/simple/price?ids=${coinId}&vs_currencies=usd`;
-        console.log(url);
-        const response = await fetch(url, requestOptions);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
-    
-        const data = await response.json();
-        
-        const jsonStr = JSON.stringify(data);
-        const jsonMap = new Map(Object.entries(JSON.parse(jsonStr)));
-        const usdObj = jsonMap.get("ethereum");
-        const cryptocurrencyPrice = usdObj.usd;
+        const cryptocurrencyPrice = await coingeckoService.getCryptocurrencyPrice(coinId);
         
         console.log(`${cryptocurrencyPrice} type: ${typeof cryptocurrencyPrice}`);
         
@@ -117,27 +95,7 @@ export const lambdaHandler = async (event, context) => {
         const dynamodbResponse = await ddbClient.send(command);
         console.log("Item added successfully:", dynamodbResponse);
         
-        const emailParams = {
-          Source: sourceEmail,
-          Destination: {
-            ToAddresses: [email],
-          },
-          Message: {
-            Subject: {
-              Data: `Cryptocurrency price`,
-            },
-            Body: {
-              Text: {
-                Data: `Price of ${coinId} is ${cryptocurrencyPrice}!`,
-              },
-            },
-          },
-        };
-        
-        const sendEmailCommand = new SendEmailCommand(emailParams);
-        
-        const sesResponse = await sesClient.send(sendEmailCommand);
-        console.log('Email sent:', sesResponse);
+        await emailService.sendEmail(email, coinId, cryptocurrencyPrice);
 
         return {
           statusCode: 200,
