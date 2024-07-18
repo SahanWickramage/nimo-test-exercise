@@ -1,17 +1,14 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-import { CoingeckoService } from './services/coingecko-service.mjs'
-import EmailService from "./services/email-service.mjs";
+import { EmailHelper } from "./helpers/email-helper.mjs";
+import CoingeckoHelper from "./helpers/coingecko-helper.mjs";
 
 const ddbClient = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(ddbClient);
-const sesClient = new SESClient();
-const coingeckoService = new CoingeckoService();
-const emailService = new EmailService();
+const coingeckoHelper = new CoingeckoHelper();
+const emailHelper = new EmailHelper();
 
 const dynamodbTableName = process.env.DYNAMODB_TABLE;
-const sourceEmail = process.env.SOURCE_EMAIL;
 
 export const lambdaHandler = async (event, context) => {
 
@@ -66,7 +63,7 @@ export const lambdaHandler = async (event, context) => {
         const coinId = event.queryStringParameters.coinId;
         console.log('coinId:', coinId);
 
-        const cryptocurrencyPrice = await coingeckoService.getCryptocurrencyPrice(coinId);
+        const cryptocurrencyPrice = await coingeckoHelper.getCryptocurrencyPrice(coinId);
         
         console.log(`${cryptocurrencyPrice} type: ${typeof cryptocurrencyPrice}`);
         
@@ -95,7 +92,7 @@ export const lambdaHandler = async (event, context) => {
         const dynamodbResponse = await ddbClient.send(command);
         console.log("Item added successfully:", dynamodbResponse);
         
-        await emailService.sendEmail(email, coinId, cryptocurrencyPrice);
+        await emailHelper.sendEmail(email, coinId, cryptocurrencyPrice);
 
         return {
           statusCode: 200,
