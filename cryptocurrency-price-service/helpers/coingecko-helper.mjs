@@ -1,4 +1,4 @@
-class CoingeckoService {
+class CoingeckoHelper {
     constructor() {
         this.baseUrl = process.env.COINGECKO_URL;
         this.apiKey = process.env.COINGECKO_API_KEY;
@@ -24,7 +24,7 @@ class CoingeckoService {
             const cryptocurrencyPriceObj = payloadMap.get(cryptocurrencyId);
             return cryptocurrencyPriceObj.usd;
         } catch (err) {
-            throw new Error(`Cannot extract cryptocurrency price. ${err.message}`);
+            throw new Error(`Cannot extract cryptocurrency price! ${err.message}`);
         }
     };
 
@@ -39,8 +39,10 @@ class CoingeckoService {
 
         const apiResponsePayload = await apiResponse.json();
         const cryptocurrencyPrice = this.#extractCryptocurrencyPrice(apiResponsePayload, cryptocurrencyId);
+        console.log(`Cryptocurrency ${cryptocurrencyId} price fetched successfully!`);
+
         return cryptocurrencyPrice;
     }
 }
 
-export default CoingeckoService;
+export default CoingeckoHelper;
