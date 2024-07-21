@@ -13,7 +13,7 @@ export const lambdaHandler = async (event, context) => {
     if (event.isLambdaRequest) {
       console.log('Lambda request!');
 
-      const queryHistory = dynamodbHelper.getHistory();
+      const queryHistory = await dynamodbHelper.getHistory();
 
       return {
         statusCode: 200,

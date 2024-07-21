@@ -6,7 +6,7 @@ class DynamodbHelper {
     constructor() {
         this.dynamodbTableName = process.env.DYNAMODB_TABLE;
         this.dynamodbClient = new DynamoDBClient();
-        this.dynamodbDocClient = DynamoDBDocumentClient.from(dynamodbClient);
+        this.dynamodbDocClient = DynamoDBDocumentClient.from(this.dynamodbClient);
     }
 
     #getPutItemParams(cryptocurrencyId, cryptocurrencyPrice, requestedBy) {
@@ -14,7 +14,7 @@ class DynamodbHelper {
         const id = Date.now().toString();
 
         return {
-            TableName: dynamodbTableName,
+            TableName: this.dynamodbTableName,
             Item: {
               "id": { S: id },
               "coinId": { S: cryptocurrencyId },
@@ -30,7 +30,7 @@ class DynamodbHelper {
             const putItemParams = this.#getPutItemParams(cryptocurrencyId, cryptocurrencyPrice, requestedBy);
             const putItemCommand = new PutItemCommand(putItemParams);
             await this.dynamodbClient.send(putItemCommand);
-            console.log(`Search query saved successfully. Id ${id}`);
+            console.log(`Search query saved successfully. Id ${putItemParams.id}`);
         } catch (err) {
             throw new Error(`Search query saving failed. ${err.message}`);
         }
@@ -38,13 +38,13 @@ class DynamodbHelper {
 
     #getScanParams() {
         return {
-            TableName: dynamodbTableName
+            TableName: this.dynamodbTableName
         };
     }
 
-    getHistory() {
+    async getHistory() {
         try {
-            const fetchedItems = this.#getAllItems();
+            const fetchedItems = await this.#getAllItems();
             const queryHistoryMap = this.#groupItems(fetchedItems);
             console.log("Fetching history succeed!");
             return queryHistoryMap;

@@ -5,7 +5,7 @@ const lambdaHelper = new LambdaHelper();
 export const lambdaHandler = async (event, context) => {
   
   try {
-    const lambdaResponsePayload = lambdaHelper.invokeLambda();
+    const lambdaResponsePayload = await lambdaHelper.invokeLambda();
     return {
       statusCode: 200,
       body: JSON.stringify({

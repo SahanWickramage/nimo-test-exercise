@@ -31,7 +31,7 @@ class CoingeckoHelper {
 
     async getCryptocurrencyPrice(cryptocurrencyId) {
         const apiRequestUrl = `${this.baseUrl}/simple/price?ids=${cryptocurrencyId}&vs_currencies=usd`;
-        const apiResponse = await fetch(apiRequestUrl, getApiRequestOptions());
+        const apiResponse = await fetch(apiRequestUrl, this.#getApiRequestOptions());
 
         if (!apiResponse.ok) {
             throw new Error(`HTTP error. ${apiResponse.status}`);
