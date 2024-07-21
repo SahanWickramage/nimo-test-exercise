@@ -8,7 +8,7 @@ class LambdaHelper {
 
     #getLambdaParams() {
         return {
-            FunctionName: `arn:aws:lambda:ap-southeast-2:211125780252:function:${functionName}`,
+            FunctionName: `arn:aws:lambda:ap-southeast-2:211125780252:function:${this.priceFunctionName}`,
             InvocationType: 'RequestResponse',
             Payload: JSON.stringify({isLambdaRequest: true})
         };
@@ -28,7 +28,8 @@ class LambdaHelper {
         try {
             const lambdaParams = this.#getLambdaParams();
             const lambdaResponse = await this.lambdaClient.send(new InvokeCommand(lambdaParams));
-            return this.#extractLambdaPayload(lambdaResponse);
+            const lambdaResponsePayload = this.#extractLambdaPayload(lambdaResponse);
+            return lambdaResponsePayload;
         } catch (err) {
             throw new Error(`Lambda invoke failed! ${err.message}`);
         }
