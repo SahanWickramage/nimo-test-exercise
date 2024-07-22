@@ -37,7 +37,7 @@ export const lambdaHandler = async (event, context) => {
       
       await dynamodbHelper.putItem(coinId, cryptocurrencyPrice, email);
       
-      await emailHelper.sendEmail(email, coinId, cryptocurrencyPrice);
+      // await emailHelper.sendEmail(email, coinId, cryptocurrencyPrice);
 
       return {
         statusCode: 200,
